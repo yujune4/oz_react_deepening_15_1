@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { boardState } from '../recoil/atom';
 import BoardDetailModal from './BoardDetailModal';
 
 const typeToKorean = (type) => {
@@ -14,15 +16,13 @@ const typeToKorean = (type) => {
   }
 };
 
-//기존 Boards 컴포넌트에서 Data를 MockData를 Props를 받고 이용하는 형태로 구성되어 있습니다.
-//이를 Recoil을 이용하여 상태관리를 하도록 변경합니다.
-//data props 항목을 삭제합니다.
-//데이터를 type에 따라 필터링하여 각 칸반보드에서 사용해야 합니다. type은 prop로 전달되고 있습니다.
-//filteredData에 할당된 data를 필터링 하세요.
-//이후 Recoil의 useRecoilValue를 이용하여 Recoil의 상태를 가져오도록 수정합니다.
+const Boards = ({ type }) => {
+  // 🔥 Recoil 전역 상태 구독
+  const data = useRecoilValue(boardState);
 
-const Boards = ({ type, data }) => {
-  const filteredData = data;
+  // 🔥 type 기준 필터링
+  const filteredData = data.filter((item) => item.type === type);
+
   const [item, setItem] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -41,6 +41,7 @@ const Boards = ({ type, data }) => {
       <div className="w-full h-[60px] bg-stone-200 rounded-sm flex items-center justify-center">
         <p className="text-lg font-semibold">{typeToKorean(type)}</p>
       </div>
+
       <div className="flex flex-col gap-2 p-4">
         {filteredData.map((item) => (
           <div
@@ -50,14 +51,23 @@ const Boards = ({ type, data }) => {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">{item.title}</h3>
-              {item.type === 'todo' && <div className="animate-pulse w-2 h-2 rounded-full bg-green-500"></div>}
-              {item.type === 'inprogress' && <div className="animate-pulse w-2 h-2 rounded-full bg-amber-500"></div>}
-              {item.type === 'done' && <div className="animate-pulse w-2 h-2 rounded-full bg-red-500"></div>}
+
+              {item.type === 'todo' && (
+                <div className="animate-pulse w-2 h-2 rounded-full bg-green-500"></div>
+              )}
+              {item.type === 'inprogress' && (
+                <div className="animate-pulse w-2 h-2 rounded-full bg-amber-500"></div>
+              )}
+              {item.type === 'done' && (
+                <div className="animate-pulse w-2 h-2 rounded-full bg-red-500"></div>
+              )}
             </div>
+
             <p className="text-sm text-gray-500">{item.created_at}</p>
           </div>
         ))}
       </div>
+
       {isOpen && <BoardDetailModal onClose={handleModalClose} item={item} />}
     </div>
   );
